@@ -1,7 +1,7 @@
 
 import streamlit as st
-from datetime import datetime
 from datetime import datetime, time, date
+from st_copy import copy_button
 
 st.title("Market Analyst Prompt Generator")
 
@@ -89,5 +89,5 @@ Consider current OI build-up for directional bias
         """
 
     st.markdown("### ✅ Generated Prompt")
-    # st.code(prompt, language='markdown')
+    copy_button(prompt, icon="st", tooltip="Copy prompt", copied_label="Copied!")
     st.markdown(prompt)
