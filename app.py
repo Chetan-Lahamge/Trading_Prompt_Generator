@@ -1,93 +1,108 @@
-
 import streamlit as st
-from datetime import datetime, time, date
+from datetime import time, date
 from st_copy import copy_button
 
 st.title("Market Analyst Prompt Generator")
 
 st.sidebar.title("Input Parameters")
 
-current_price = st.sidebar.number_input("Current Price", min_value=0.0, value=25000.0)
-# current_time = st.sidebar.time_input("Select Time", value=datetime.now().time(), step=60)
-current_time = st.sidebar.time_input("Select Current Time", value=time(9, 30), step=60)
-current_date = st.sidebar.date_input("Select Date", value=date.today())
+index_choice = st.sidebar.selectbox(
+    "Select Instrument Type",
+    ["Nifty 50", "Bank Nifty", "FinNifty", "Stock F&O"]
+)
+
+if index_choice == "Stock F&O":
+    stock_name = st.sidebar.text_input("Enter Stock Name", value="Tata Motors")
+    current_price = st.sidebar.number_input(f"Current Price of {stock_name}", min_value=0.0, value=900.0)
+else:
+    current_price = st.sidebar.number_input("Current Index Price", min_value=0.0, value=25000.0)
+
+current_time = st.sidebar.time_input("Current Time (IST)", value=time(9, 30), step=60)
+current_date = st.sidebar.date_input("Current Date", value=date.today())
 expiry_date = st.sidebar.date_input("Expiry Date")
-index_choice = st.sidebar.selectbox("Select Index", ["Nifty 50", "Bank Nifty"])
+risk_appetite = st.sidebar.slider("Risk Appetite (% of premium)", min_value=10, max_value=70, value=50)
 
 st.markdown("---")
 
-if st.sidebar.button("Generate Prompt"):
-    if index_choice == "Bank Nifty":
-        prompt = f"""
-You are an expert financial analyst specializing in the Indian equity and derivatives markets, with a focus on Bank Nifty options.
-The current Bank Nifty index level is **{current_price}** as of **{current_time} IST, {current_date}**.
+def generate_prompt(instrument, price, time_val, date_val, expiry, risk, stock_name=None):
+    if instrument == "Stock F&O":
+        heading = f"""
+You are an expert financial analyst specializing in the Indian equity and derivatives markets, with a focus on F&O trading for **{stock_name}**.
+The current price of **{stock_name}** is **{price}** as of **{time_val} IST, {date_val}**.
+"""
+        factors = f"""
+Analyze the following for **{stock_name}**:
+- Technical indicators: candlestick patterns, intraday trends, support/resistance, OI at key strikes, option Greeks, IV from NSE live data.
+- Fundamental drivers: sector-specific news, earnings reports, company announcements, macroeconomic cues.
+- Real-time sentiment: market news, management commentary, industry trends, geopolitical impact.
 
-Using a combination of:
-- Technical analysis (candlestick patterns, intraday indicators, key support/resistance, OI build-up at strikes, implied volatility, option Greeks)
-- Fundamental analysis (macroeconomic cues, RBI policies, FII/DII flows, sectoral banking news, global financial market impact)
-- Real-time news sentiment (financial headlines, corporate banking news, RBI commentary, geopolitical developments affecting financials)
+"""
+        probability = f"""
+### 1️⃣ Intraday Closing Probability Estimates (Total 100%):
+- Upside Close (above **{price}**): ___%
+- Downside Close (below **{price}**): ___%
+- Neutral/Flat Close (within ±0.5%): ___%
 
-Please analyze and provide:
+"""
+        option_section = f"""
+### 2️⃣ Option Buying Recommendation (ATM – {expiry} Expiry):
+- Best Call Option strike with expected intraday return (%)
+- Best Put Option strike with expected intraday return (%)
+- Key risks (IV crush, reversal risk, news events)
 
-1️⃣ **Intraday Probability Estimates (in %)** for Bank Nifty closing today:
-- Upside probability (above **{current_price}**)
-- Downside probability (below **{current_price}**)
-
-2️⃣ **Option Buying Recommendation (ATM – {expiry_date} Expiry):**
-- Best ATM Call Option to buy — with expected intraday return (%)
-- Best ATM Put Option to buy — with expected intraday return (%)
-- Major risk factors for both strategies (volatility crush, unexpected reversals, sudden news impact)
-
-⚠️ **Risk Appetite:**
-Willing to risk up to **15% of premium** for potential **50%+ intraday gains**
-
-📊 **Assumed Implied Volatility (ATM):**
-**17-18%**
-
-📈 **Open Interest (OI) Sensitivity:**
-Consider current OI build-up and unwinding at key strikes for directional bias
-
-✅ **Actionable Summary Needed:**
-- Which strategy is recommended today (Buy Call, Buy Put, or Both)?
-- Exact strike(s) to consider for intraday trade
-- Approximate premium per lot (₹) and estimated probability of success (%)
-        """
+"""
     else:
-        prompt = f"""
-You are an expert financial analyst specializing in the Indian equity and derivatives markets, with a focus on Nifty 50 options.
-The current Nifty 50 index level is **{current_price}** as of **{current_time} IST, {current_date}**.
+        heading = f"""
+You are an expert financial analyst specializing in the Indian equity and derivatives markets, with a focus on **{instrument} options**.
+The current **{instrument}** index level is **{price}** as of **{time_val} IST, {date_val}**.
+"""
+        factors = """
+Use a combination of:
+- Technical factors: candlestick patterns, intraday indicators, key support/resistance levels, open interest (OI) build-up, option Greeks, IV based on live data.
+- Fundamental cues: macroeconomic events, sector news, FII/DII flows, global market trends.
+- Real-time sentiment: news headlines, RBI commentary, corporate actions, geopolitical factors.
 
-Using a combination of:
-- Technical analysis (candlestick patterns, intraday indicators, support/resistance, OI build-up, IV, option Greeks)
-- Fundamental analysis (macroeconomic cues, FII/DII flows, sectoral news, global markets impact)
-- Real-time news sentiment (headlines, corporate actions, RBI commentary, geopolitical events)
+"""
+        probability = f"""
+### 1️⃣ {instrument} Intraday Closing Probability Estimates (Total 100%):
+- Upside Close (above **{price}**): ___%
+- Downside Close (below **{price}**): ___%
+- Neutral/Flat Close (within ±0.2%): ___%
 
-Please analyze and provide:
+"""
+        option_section = f"""
+### 2️⃣ Option Buying Recommendation (ATM – {expiry} Expiry):
+- Best Call Option strike with expected intraday return (%)
+- Best Put Option strike with expected intraday return (%)
+- Key risk factors (IV crush, reversal risk, news impact)
 
-1️⃣ **Intraday Probability Estimates (in %)** for Nifty 50 closing:
-- Upside (above **{current_price}**)
-- Downside (below **{current_price}**)
+"""
 
-2️⃣ **Option Buying Recommendation (ATM – {expiry_date} Expiry):**
-- Best call option to buy with expected intraday return (%)
-- Best put option to buy with expected intraday return (%)
-- Major risk factors for each scenario (volatility crush, sharp reversals, news risks)
-
+    risk_section = f"""
 ⚠️ **Risk Appetite:**
-Willing to risk up to **70% of premium** for potential **100%+ intraday gains**
+Willing to risk up to **{risk}% of premium** for potential high intraday gains.
 
-📊 **Assumed IV:**
-**17-18% ATM**
+📊 **OI Sensitivity:**
+Evaluate live OI build-up and unwinding — especially at ATM and nearby strikes.
 
-📈 **OI Sensitivity:**
-Consider current OI build-up for directional bias
+✅ **Actionable Summary:**
+- Recommended strategy for today (Buy Call, Buy Put, Both, or Wait)
+- Suggested strike(s) with approx. premium per lot (₹)
+- Expected probability of success (%)
+- Rationale covering technicals, OI, and sentiment.
 
-✅ **Actionable Summary Needed:**
-- Which strategy to execute today (buy call, buy put, or both)
-- Exact strike(s) recommended
-- Approximate premium per lot (₹) and probability of success (%)
-        """
+💡 *Base your analysis on live market behavior — avoid static assumptions.*
+"""
+
+    return heading + factors + probability + option_section + risk_section
+
+
+if st.sidebar.button("Generate Prompt"):
+    if index_choice == "Stock F&O":
+        prompt = generate_prompt(index_choice, current_price, current_time, current_date, expiry_date, risk_appetite, stock_name)
+    else:
+        prompt = generate_prompt(index_choice, current_price, current_time, current_date, expiry_date, risk_appetite)
 
     st.markdown("### ✅ Generated Prompt")
-    copy_button(prompt, icon="st", tooltip="Copy prompt", copied_label="Copied!")
+    copy_button(prompt, icon="📋", tooltip="Copy prompt", copied_label="Copied!")
     st.markdown(prompt)
