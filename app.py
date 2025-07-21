@@ -1,5 +1,6 @@
-import streamlit as st
+import pytz
 from datetime import datetime, date
+import streamlit as st
 from st_copy import copy_button
 
 st.title("Nifty & Stock Options Intraday Prompt Generator")
@@ -18,7 +19,8 @@ else:
     current_price = st.sidebar.number_input("Current Index Price", min_value=0.0, value=25000.0)
 
 # Automatically set current time as default, allow manual override
-default_time = datetime.now().time()
+ist = pytz.timezone('Asia/Kolkata')
+default_time = datetime.now(ist).time()
 current_time = st.sidebar.time_input("Current Time (IST)", value=default_time, step=60)
 
 current_date = st.sidebar.date_input("Current Date", value=date.today())
