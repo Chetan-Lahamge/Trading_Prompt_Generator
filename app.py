@@ -52,7 +52,8 @@ I want to trade between **9:30 am and 3:00 pm** with a **high‑risk** approach.
 I will take the expiry as **{expiry}**.
 
 At the end, provide a concise **“Actionable Summary”**:
-  • Which specific strategy should I execute on **{date_val}** — buy calls, buy puts, or both?  
+
+  • Which specific strategy should I execute today **{date_val}** — buy calls, buy puts, or both buy?  
   • Which strike(s) would you choose if you were trading intraday?  
   • Approximately what premium (₹) and probability (%) does each recommended position carry?
 
@@ -85,7 +86,8 @@ I want to trade between **9:30 am and 3:00 pm** with a **high‑risk** approach.
 I will take the expiry as **{expiry}**.
 
 At the end, provide a concise **“Actionable Summary”**:
-  • Which specific strategy should I execute on **{date_val}** — buy calls, buy puts, or both?  
+
+  • Which specific strategy should I execute today **{date_val}** — buy calls, buy puts, or both buy?  
   • Which strike(s) would you choose if you were trading intraday?  
   • Approximately what premium (₹) and probability (%) does each recommended position carry?
 
