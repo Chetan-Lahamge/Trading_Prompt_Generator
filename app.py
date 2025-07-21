@@ -1,5 +1,5 @@
 import streamlit as st
-from datetime import time, date
+from datetime import datetime, date
 from st_copy import copy_button
 
 st.title("Nifty & Stock Options Intraday Prompt Generator")
@@ -17,7 +17,10 @@ if index_choice == "Stock F&O":
 else:
     current_price = st.sidebar.number_input("Current Index Price", min_value=0.0, value=25000.0)
 
-current_time = st.sidebar.time_input("Current Time (IST)", value=time(9, 30), step=60)
+# Automatically set current time as default, allow manual override
+default_time = datetime.now().time()
+current_time = st.sidebar.time_input("Current Time (IST)", value=default_time, step=60)
+
 current_date = st.sidebar.date_input("Current Date", value=date.today())
 expiry_date = st.sidebar.date_input("Options Expiry Date")
 risk_appetite = st.sidebar.slider("Risk Appetite (% of premium)", min_value=10, max_value=70, value=50)
